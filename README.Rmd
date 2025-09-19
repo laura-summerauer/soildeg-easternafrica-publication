@@ -1,0 +1,43 @@
+---
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
+## Rapid soil degradation following deforestation in Eastern Africa
+
+This repository contains code and data to reproduce the obtained results for the submitted manuscript. 
+
+## R Session Info
+
+```{r echo = FALSE}
+# packages <- c("tidyverse", "cowplot", "grid", "gridExtra", "multcomp", "multcompView", "sf", "elevatr", "terra", "tidyterra", 
+#               "ggnewscale", "giscoR", "units", "ggblend", "raster", "geodata")
+# lapply(packages, library, character.only = TRUE)
+
+library(tidyverse)
+library(cowplot)
+library(grid)
+library(gridExtra)
+library(multcomp)
+library(multcompView)
+library(sf)
+library(elevatr)
+library(terra)
+library(tidyterra)
+library(ggnewscale)
+library(giscoR)
+library(units)
+library(ggblend)
+library(raster)
+library(geodata)
+
+```
+
+
+```{r echo=TRUE}
+sessionInfo()
+```
+
