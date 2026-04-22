@@ -16,7 +16,7 @@ rm(list = ls())
 library(tidyverse)
 
 # load plotting details
-source("plotting_details.R")
+source("code/plotting_details.R")
 
 
 
@@ -114,7 +114,47 @@ p_legend <- cowplot::plot_grid(legend, NULL, p_graphs_arr, ncol = 1, rel_heights
 p_legend
 
 
-# save plot
-ggsave(p_legend, filename = "out/fig03.png", width = 7, height = 8, bg = "white")
+# # save plot
+# ggsave(p_legend, filename = "out/fig03.png", width = 7, height = 8, bg = "white")
 
 
+
+##################################################################
+##                          FMC vs SOC                          ##
+##################################################################
+
+
+(p_fmc_soc <- ggplot(all_joined[all_joined$geology == "mafic",], aes(y = FMC, x = TC_gkg, color = years_since_deforestation, group = core_id)) +
+   geom_path(linewidth = 0.8, alpha = 0.5, color = "gray40") +
+   geom_point(mapping = aes(shape = land_use, fill = years_since_deforestation), size = 3, alpha = 0.8, colour = "black") +
+   scale_color_manual("Years since deforestation", values = palette_all[c(1,5)]) +
+   scale_fill_manual("Years since deforestation", values = palette_all[c(1,5)]) +
+   scale_shape_manual("Land use", values = shape_values) +
+   theme_minimal() +
+   labs(
+     y = "Fm",
+     x = expression(paste("SOC (g ", kg^{-1}, ")")) 
+   ) +
+   theme_ls+
+   theme(legend.position = "none",
+         strip.background = element_blank(),
+         strip.text.x = element_blank(), 
+         axis.title.y = element_text(face = "italic"))
+)
+
+
+
+
+library(cowplot)
+final_fmcsoc_plot <- ggdraw(p_fmc_soc) +
+  draw_plot(
+    legend, 
+    x = 0.5,   
+    y = 0.1,   
+    width = 0.2, 
+    height = 0.2
+  )
+
+final_plot
+
+# ggsave(final_fmcsoc_plot, filename = "out/fig03b.png", width = 6, height = 5)

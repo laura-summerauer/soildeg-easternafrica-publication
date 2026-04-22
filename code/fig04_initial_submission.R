@@ -17,7 +17,7 @@ rm(list = ls())
 library(tidyverse)
 
 # load plotting theme details
-source("plotting_details.R")
+source("code/plotting_details.R")
 
 
 
@@ -126,8 +126,11 @@ sum_def_stocks <- inner_join(df_summ, data_sel, by = c("id" = "sample_id")) %>%
 #################################################################
 
 
-(p_depth <- ggplot(sum_def_stocks, aes(x = years_since_deforestation, y = depth, fill = years_since_deforestation)) + 
-  geom_boxplot(linewidth = 0.3) +
+(p_depth <- ggplot(sum_def_stocks, 
+                   mapping = aes(x = years_since_deforestation, 
+                                 y = depth, 
+                                 fill = years_since_deforestation)) + 
+  geom_boxplot(linewidth = 0.3, notch = FALSE) +
     geom_jitter(shape = 21, alpha = 0.5) +
   facet_grid(.~land_use, scales = "free", space = "free_x")+
   scale_fill_manual(values = palette_withoutforest) +
@@ -161,7 +164,160 @@ sum_def_stocks <- inner_join(df_summ, data_sel, by = c("id" = "sample_id")) %>%
 # save plot
 p_both <- cowplot::plot_grid(p_depth, p_stocks, nrow = 2, align = "v")
 p_both
-ggsave(p_both, filename = "out/fig04.png", width = 7, height = 6)
+# ggsave(p_both, filename = "out/fig04.png", width = 7, height = 6)
 
 
 
+
+
+
+
+
+
+library(boot)
+
+# Function to calculate Bootstrap SE of the Median
+get_median_se <- function(x, R = 2000) {
+  if(length(x) < 4) return(NA) # Kirchner: uncertainty needs enough data
+  b <- boot(x, function(d, i) median(d[i]), R = R)
+  return(sd(b$t)) # The SD of the bootstrap distribution is the SE
+}
+
+# Calculate for your data table
+summary_table <- sum_def_stocks %>%
+  group_by(years_since_deforestation, land_use) %>%
+  summarise(
+    n = n(),
+    Median = median(sum_c_stocks),
+    SE_Median = get_median_se(sum_c_stocks)
+  )
+
+
+print(summary_table)
+
+
+
+summary_results <- sum_def_stocks %>%
+  group_by(years_since_deforestation, land_use) %>%
+  summarise(
+    n = n(),
+    Mean = mean(sum_c_stocks, na.rm = TRUE),
+    # Standard Deviation / Square Root of n
+    SE = sd(sum_c_stocks, na.rm = TRUE) / sqrt(n())
+  ) %>%
+  # Rounding for a clean report
+  mutate(across(c(Mean, SE), \(x) round(x, 2)))
+
+print(summary_results)
+
+
+
+
+
+library(ggtext)
+
+
+# 1. Calculate the total range of your data first
+depth_range <- diff(range(sum_def_stocks$depth, na.rm = TRUE))
+# We want the label to sit roughly 7% of the total plot height above each box
+offset.depth <- depth_range * 0.07 
+
+
+depth.label_stats_fixed_gap <- function(x) {
+  n_val <- length(x)
+  m_val <- round(mean(x, na.rm = TRUE), 1)
+  s_val <- round(sd(x, na.rm = TRUE) / sqrt(n_val), 1)
+  
+  txt <- if(n_val < 2) {
+    sprintf("%.1f<br><i>n</i> = %d", m_val, n_val)
+  } else {
+    sprintf("%.1f &plusmn; %.1f<br><i>n</i> = %d", m_val, s_val, n_val)
+  }
+  
+  # FIX: Use a constant offset instead of a percentage multiplier
+  # This makes the "air" above every box look exactly the same
+  return(data.frame(y = max(x, na.rm = TRUE) + offset.depth, label = txt))
+}
+
+
+
+
+(p_depth <- ggplot(sum_def_stocks,
+                   mapping = aes(x = years_since_deforestation,
+                                 y = depth,
+                                 fill = years_since_deforestation)) +
+    geom_boxplot(linewidth = 0.3, notch = FALSE) +
+    geom_jitter(shape = 21, alpha = 0.5) +
+    stat_summary(fun.data = depth.label_stats_fixed_gap, 
+                 geom = "richtext", 
+                 fill = NA,          # Remove background box
+                 label.color = NA,   # Remove border
+                 size = 3.5, 
+                 lineheight = 0.8) + # ADJUST THIS to tighten/loosen the rows
+    facet_grid(.~land_use, scales = "free", space = "free_x")+
+    scale_fill_manual(values = palette_withoutforest) +
+    xlab("")+
+    ylab("Depth in forest profile (cm)") +
+    theme_ls +
+    theme(legend.position = "none",
+          axis.text.x = element_blank(),
+          strip.text = element_text(size = 12),
+          axis.text.y = element_text(size = 12),
+          axis.title.y = element_text(size = 12))
+)
+
+
+
+
+
+
+# 1. Calculate the total range of your data first
+stock.range <- diff(range(sum_def_stocks$sum_c_stocks, na.rm = TRUE))
+# We want the label to sit roughly 7% of the total plot height above each box
+stock.offset <- stock.range * 0.07 
+
+
+stock.label_stats_fixed_gap <- function(x) {
+  n_val <- length(x)
+  m_val <- round(mean(x, na.rm = TRUE), 1)
+  s_val <- round(sd(x, na.rm = TRUE) / sqrt(n_val), 1)
+  
+  txt <- if(n_val < 2) {
+    sprintf("%.1f<br><i>n</i> = %d", m_val, n_val)
+  } else {
+    sprintf("%.1f &plusmn; %.1f<br><i>n</i> = %d", m_val, s_val, n_val)
+  }
+  
+  # FIX: Use a constant offset instead of a percentage multiplier
+  # This makes the "air" above every box look exactly the same
+  return(data.frame(y = max(x, na.rm = TRUE) + stock.offset, label = txt))
+}
+
+
+(p_stocks <-  ggplot(sum_def_stocks, 
+                     mapping = aes(x = years_since_deforestation, 
+                                   y = sum_c_stocks, 
+                                   fill = years_since_deforestation)) + 
+    geom_boxplot(linewidth = 0.3) +
+    geom_jitter(shape = 21, alpha = 0.5) +
+    # Use geom_richtext from ggtext for HTML support
+    stat_summary(fun.data = stock.label_stats_fixed_gap, 
+                 geom = "richtext", 
+                 fill = NA,          # Remove background box
+                 label.color = NA,   # Remove border
+                 size = 3.5, 
+                 lineheight = 0.8) + # ADJUST THIS to tighten/loosen the rows
+    facet_grid(.~land_use, scales = "free", space = "free_x")+
+    scale_fill_manual(values = palette_withoutforest) +
+    xlab("Years since deforestation")+
+    ylab(expression(paste("Lost carbon stocks (t ", ha^{-1}, ")"))) +
+    theme_ls +
+    theme(legend.position = "none",
+          strip.background = element_blank(),
+          strip.text.x = element_blank(),
+          axis.text = element_text(size = 12),
+          axis.title = element_text(size = 12))
+)
+
+p_both <- cowplot::plot_grid(p_depth, p_stocks, nrow = 2, align = "v")
+p_both
