@@ -17,7 +17,7 @@ ld_pkgs <- c("tidyverse", "cowplot", "grid", "gridExtra")
 lapply(ld_pkgs, library, character.only = TRUE)
 
 # load plotting details
-source("plotting_details.R")
+source("code/plotting_details.R")
 
 #################################################################
 ##                    Load and prepare data                    ##
@@ -259,15 +259,16 @@ data_smooth_felsic$sign_corr |> unique()
     geom_point(data_mafic_gathered, 
                mapping = aes(ph_ecec_value, bases_al_value, fill = years_since_deforestation, shape = land_use), 
                size = 3.5, alpha = 0.7, colour = "black")+
-    scale_shape_manual("Land use",  values = shape_values) +
-    scale_fill_manual("Years since deforestation   ", values = palette_all) +
+   scale_fill_manual("Years since deforestation   ", values = palette_all, labels = c("0", "2–7", "10–20", "40–60", "&gt; 60")) +
+    scale_shape_manual("Land use",  values = shape_values, labels = c("forest", "cropland", "abandoned", "*Eucalyptus*")) +
     guides(shape = guide_legend(order = 1),
            fill = guide_legend(override.aes = list(shape = 21), order = 2))+
 
     facet_grid(bases_al ~ ph_ecec, scales = "free", switch = c("both"),
                labeller = labeller(bases_al =  as_labeller(facet_names_property, label_parsed),
                                    ph_ecec =  as_labeller(facet_names_property, label_parsed)))+ 
-    theme_ls
+    theme_ls+
+   theme(legend.text = ggtext::element_markdown())
 )
 
 

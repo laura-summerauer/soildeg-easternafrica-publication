@@ -51,7 +51,8 @@ all_joined$land_use <- factor(all_joined$land_use, levels = c("forest", "croplan
   ylab("Depth (cm)")+
   scale_y_reverse()+
   theme_ls+
-  theme(legend.position = "none"))
+  theme(legend.position = "none",
+        axis.title.x = element_text(face = "italic")))
  
 
 (p_depth_tc <- ggplot() +
@@ -93,9 +94,9 @@ all_joined$land_use <- factor(all_joined$land_use, levels = c("forest", "croplan
     geom_path(all_joined[!all_joined$set == "TropSOC",], mapping = aes(x = TC_gkg, y = mid_increment_depth_cm, group = core_id, colour = years_since_deforestation)) +
     geom_point(all_joined[!all_joined$set == "TropSOC",], mapping = aes(x = TC_gkg, y = mid_increment_depth_cm, fill = years_since_deforestation, shape = land_use), size = 3, alpha = 0.8, colour = "black") +
     
-    scale_fill_manual("Years since deforestation: ", values = palette_all[c(1,5)]) +
-    scale_color_manual("Years since deforestation: ", values = palette_all[c(1,5)]) +
-    scale_shape_manual("Land cover: ", values = shape_values) +
+    scale_fill_manual("Years since deforestation: ", values = palette_all[c(1,5)], labels = c("0", "&gt; 60")) +
+    scale_color_manual("Years since deforestation: ", values = palette_all[c(1,5)], labels = c("0", "&gt; 60")) +
+    scale_shape_manual("Land cover: ", values = shape_values, labels = c("forest", "cropland", "abandoned", "*Eucalyptus*")) +
     guides(fill = guide_legend(override.aes = list(shape = 21), title.hjust = 1))+
     facet_grid(. ~geology) +
     # scale_colour_manual("", values = palette_all)+
@@ -106,16 +107,17 @@ all_joined$land_use <- factor(all_joined$land_use, levels = c("forest", "croplan
     theme_ls+
     theme(legend.position = "top",
           strip.background = element_blank(),
-          strip.text.x = element_blank()))
+          strip.text.x = element_blank(),
+          legend.text = ggtext::element_markdown()))
 
 legend <- cowplot::get_plot_component(legend.plot, pattern = "guide-box-top")
 
-p_legend <- cowplot::plot_grid(legend, NULL, p_graphs_arr, ncol = 1, rel_heights = c(0.09, -0.01, 1))
+p_legend <- cowplot::plot_grid(legend, NULL, p_graphs_arr, ncol = 1, rel_heights = c(0.095, -0.01, 1))
 p_legend
 
 
 # # save plot
-# ggsave(p_legend, filename = "out/fig03.png", width = 7, height = 8, bg = "white")
+ggsave(p_legend, filename = "out/fig03.png", width = 7, height = 8, bg = "white")
 
 
 
@@ -155,6 +157,6 @@ final_fmcsoc_plot <- ggdraw(p_fmc_soc) +
     height = 0.2
   )
 
-final_plot
+final_fmcsoc_plot
 
 # ggsave(final_fmcsoc_plot, filename = "out/fig03b.png", width = 6, height = 5)

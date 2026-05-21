@@ -115,7 +115,7 @@ forestc_felsic[forestc_felsic < 1] <- NA
 #################################################################
 ##               Lake data for two study regions               ##
 #################################################################
-lakes <- st_read("maps/hydrology/lakes_central_africa.shp")
+lakes <- st_read("maps/Hydrolakes/lakes_central_africa.shp")
 lakes <- as(lakes, "Spatial")
 
 # mafic region
@@ -130,7 +130,7 @@ lakes_felsic <- st_as_sf(lakes_felsic)
 ##################################################################
 ##       Load colour coding as in all the remaining plots       ##
 ##################################################################
-source("plotting_details.R")
+source("code/plotting_details.R")
 
 #################################################################
 ##                       Large-scale map                       ##
@@ -168,14 +168,16 @@ m_mafic <- ggplot() +
   list(
     # hillshade
     geom_spatraster(data = hill_mafic, show.legend = FALSE, alpha = 1),
-    scale_fill_gradientn(values = c(0, 0.8, 1, 150, 250), colours = c("black", "grey98", "grey99", "grey100",  "white")),
+    scale_fill_gradientn(
+      values = c(0, 0.8, 1, 150, 250),
+      colours = c("black", "grey98", "grey99", "grey100",  "white")),
     new_scale_fill(),
     # forest cover
     geom_spatraster(data = forestc_mafic,
                     show.legend = FALSE, alpha = 0.6),
     scale_fill_gradient(low = "#006400", high = "#006400", na.value = "transparent"),
     new_scale_fill()
-  ) %>% 
+  ) %>%
   blend("multiply") +
   # lakes
   geom_sf(data = lakes_mafic, alpha = 1,
@@ -184,7 +186,7 @@ m_mafic <- ggplot() +
   # add main city Bukavu for orientation purposes
   geom_point(mapping = aes(x = 28.84281, y = -2.49077), shape = 15, colour = "black", size = 2) +
   geom_text(mapping = aes(x = 28.9, y = -2.53, label = "Bukavu"), size = 3, fontface = "bold")+
-  new_scale_fill() +
+  # new_scale_fill() +
   # add sampling points (colour by year since deforestation)
   geom_sf(data = mafic_sf, aes(fill = years_since_deforestation, shape = land_use), colour = "black", size = 3, alpha = 0.6) +
   scale_fill_manual("Years since deforestation", values = palette_all) +
@@ -203,7 +205,9 @@ m_mafic <- ggplot() +
         axis.title.x = element_blank(),
         legend.position = "none")
 
-m_mafic
+# m_mafic
+
+
 
 
 m_felsic <- ggplot() +
@@ -217,7 +221,7 @@ m_felsic <- ggplot() +
                     show.legend = FALSE, alpha = 0.6),
     scale_fill_gradient(low = "#006400", high = "#006400", na.value = "transparent"),
     new_scale_fill()
-  ) %>% 
+  ) %>%
   blend("multiply") +
   new_scale_fill() +
   # lakes
@@ -246,7 +250,7 @@ m_felsic <- ggplot() +
         legend.position = "none")
 
 
-m_felsic
+# m_felsic
 
 
 
@@ -260,9 +264,10 @@ legend.plot <- ggplot() +
   geom_sf(data = mafic_sf, aes(fill = years_since_deforestation, shape = land_use), colour = "black", size = 3, alpha = 0.7) +
   guides(shape = guide_legend(order = 1),
          fill = guide_legend(override.aes = list(shape = 21), order = 2))+
-  scale_fill_manual("Years since deforestation", values = palette_all) +
-  scale_shape_manual("Land use", values = shape_values) +
-  theme_ls
+  scale_fill_manual("Years since deforestation", values = palette_all, labels = c("0", "2–7", "10–20", "40–60", "&gt; 60")) +
+  scale_shape_manual("Land use", values = shape_values, labels = c("forest", "cropland", "abandoned", "*Eucalyptus*")) +
+  theme_ls +
+  theme(legend.text = ggtext::element_markdown())
 
 # get legend
 legend <- cowplot::get_plot_component(legend.plot, pattern = "guide-box-top")

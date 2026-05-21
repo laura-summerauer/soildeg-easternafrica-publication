@@ -15,7 +15,7 @@ lapply(ld_pkgs, library, character.only = TRUE)
 
 
 # load plotting theme detils for ggplot2
-source("plotting_details.R")
+source("code/plotting_details.R")
 
 ##################################################################
 ##                         Prepare data                         ##
@@ -126,7 +126,12 @@ Tk_merged <- bind_rows(Tk_maf, Tk_fel)
    scale_y_continuous(limits = c(0, 112), breaks = seq(0, 112, by = 30))+
    facet_grid(factor(geology, levels = c("mafic", "felsic")) ~ land_use , 
               scales = "free", space = "free_x",  
-              labeller = labeller(property =  as_labeller(facet_names_property, label_parsed))
+              labeller = labeller(property =  as_labeller(facet_names_property, label_parsed),
+                                  land_use = as_labeller(c("forest" = "forest",
+                                                         "cropland" = "cropland",
+                                                         "abnd." = "abnd.",
+                                                         "eucalyptus" = "italic(Eucalyptus)"), label_parsed)
+                                  )
    ) +
    geom_text(data = Tk_merged, aes(x = years_since_deforestation, y = quant, label = Letters), 
              size = 3.5, vjust=-3.8, hjust =0.5) +

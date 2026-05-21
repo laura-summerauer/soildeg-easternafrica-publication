@@ -18,7 +18,7 @@ ld_pkgs <- c("tidyverse", "multcomp", "multcompView", "cowplot", "grid", "gridEx
 lapply(ld_pkgs, library, character.only = TRUE)
 
 # load plotting details
-source("plotting_details.R")
+source("code/plotting_details.R")
 
 ##################################################################
 ##              Read and prepare data for plotting              ##
@@ -47,7 +47,7 @@ data_sel <- data_sel
 
 
 ## plot with resinP, TN, ECEC
-data_sel[,c(59, 28, 33)]
+data_sel[,c(38, 26, 29)]
 data_sel$TN_gkg
 
 data_sel_gathered <- data_sel %>%
@@ -216,8 +216,11 @@ stats_merged_out_fel$property <- factor(stats_merged_out_fel$property,
              size = 3.5, vjust=-1, hjust =0.5) +
    facet_grid(property ~ land_use, 
               scales = "free", space = "free_x",  switch = "y",
-              labeller = labeller(property =  as_labeller(facet_names_property, label_parsed))
-   ) +
+              labeller = labeller(property =  as_labeller(facet_names_property, label_parsed),
+                                  land_use = as_labeller(c("forest" = "forest",
+                                                           "cropland" = "cropland",
+                                                           "abnd." = "abnd.",
+                                                           "eucalyptus" = "italic(Eucalyptus)"), label_parsed))) +
    ggh4x::facetted_pos_scales(
      y = list(
        property == "TN_gkg" ~  scale_y_continuous(breaks = seq(0, 10, 2), limits = c(0, 10)),
@@ -249,8 +252,11 @@ stats_merged_out_fel$property <- factor(stats_merged_out_fel$property,
               size = 3.5, vjust=-1, hjust =0.5) +
   facet_grid(property ~ land_use, 
              scales = "free", space = "free_x",  switch = "y",
-             labeller = labeller(property =  as_labeller(facet_names_property, label_parsed))
-  ) +
+             labeller = labeller(property =  as_labeller(facet_names_property, label_parsed),
+                                 land_use = as_labeller(c("forest" = "forest",
+                                                          "cropland" = "cropland",
+                                                          "abnd." = "abnd.",
+                                                          "eucalyptus" = "italic(Eucalyptus)"), label_parsed))) +
     ggh4x::facetted_pos_scales(
       y = list(
         property == "TN_gkg" ~  scale_y_continuous(breaks = seq(0, 10, 2), limits = c(0, 10)),

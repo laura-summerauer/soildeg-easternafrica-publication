@@ -16,7 +16,7 @@ rm(list = ls())
 library(tidyverse)
 
 # load plotting details
-source("plotting_details.R")
+source("code/plotting_details.R")
 
 
 
@@ -64,8 +64,8 @@ annotation <- mutate(stats,
     geom_smooth(data_top_gath[data_top_gath$property == stats$property & data_top_gath$geology == stats$geology,], mapping = aes(value, TC_gkg), se = TRUE, colour = "gray", alpha = 0.2, method = "lm") +
     geom_point(data_top_gath, mapping = aes(value, TC_gkg, fill = years_since_deforestation, shape = land_use),
                size = 3.5, alpha = 0.7, colour = "black")+
-    scale_shape_manual("Land use",  values = shape_values) +
-    scale_fill_manual("Years since deforestation", values = palette_all) +
+    scale_shape_manual("Land use",  values = shape_values, labels = c("forest", "cropland", "abandoned", "*Eucalyptus*")) +
+    scale_fill_manual("Years since deforestation", values = palette_all, labels = c("0", "2–7", "10–20", "40–60", "&gt; 60")) +
     guides(shape = guide_legend(order = 1),
            fill = guide_legend(override.aes = list(shape = 21), order = 2))+
     ggplot2::geom_text(inherit.aes = FALSE, data = annotation,
@@ -88,7 +88,8 @@ annotation <- mutate(stats,
           strip.text.y = element_text(size = 12),
           axis.title.y = element_text(size = 12),
           axis.text.x = element_text(size = 10),
-          axis.text.y = element_text(size = 10))
+          axis.text.y = element_text(size = 10),
+          legend.text = ggtext::element_markdown())
 )
 
 ggsave(p, filename = "out/fig07.png", height = 5.5, width = 9)
