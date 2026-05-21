@@ -68,7 +68,7 @@ all_joined$land_use <- factor(all_joined$land_use, levels = c("forest", "croplan
     # scale_colour_manual("", values = palette_all)+
     scale_x_continuous(limits = c(0, 95), breaks = seq(10, 95, 20), expand = c(0,0))+
     xlab(expression(paste("SOC (g ", kg^{-1}, ")")))+
-    ylab("Depth cm")+
+    ylab("Depth (cm)")+
     scale_y_reverse()+
     theme_ls+
     theme(legend.position = "none",
